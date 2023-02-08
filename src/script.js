@@ -1,6 +1,7 @@
 import './style.css'
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 // Scene
 
@@ -14,7 +15,6 @@ window.addEventListener(
     (event) => {
         cursor.x = event.clientX / 500 - 0.5;
         cursor.y = -(event.clientY / 500 - 0.5);
-        console.log(cursor.y);
     }
     );
 
@@ -68,23 +68,51 @@ group.scale.set(0.5,0.5,0.5);
 const axesHelper = new THREE.AxesHelper(1);
 scene.add( axesHelper );
 
+const canvasDimension = {
+    width: window.innerWidth,
+    height: window.innerHeight
+};
+
 // Camera
-const camera = new THREE.PerspectiveCamera(50, 1, 0.1 , 100);
+const camera = new THREE.PerspectiveCamera(50, canvasDimension.width/canvasDimension.height, 0.1 , 100);
 // const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,100); 
 camera.position.set(0,0,4);
 camera.rotation.set(0,0,0);
 // camera.lookAt(mesh.position);
 scene.add( camera );
 
-// Rendererp
+
+// Renderer
 const canvas = document.querySelector('canvas');
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 });
-renderer.setSize( 500, 500 );
 
+window.addEventListener('resize', () => {
+    // Update sizes
+    canvasDimension.width = window.innerWidth;
+    canvasDimension.height = window.innerHeight;
+
+    // Update camera
+    camera.aspect = canvasDimension.width / canvasDimension.height;
+    camera.updateProjectionMatrix();
+
+    // Update renderer
+    renderer.setSize( canvasDimension.width, canvasDimension.height );
+    renderer.setPixelRatio( Math.min(window.devicePixelRatio, 3) );
+});
+window.addEventListener('dblclick', () => {
+camera.position.set(0,0,4);
+});
+
+console.log(canvasDimension);
+renderer.setSize( canvasDimension.width, canvasDimension.height );
+renderer.setPixelRatio( Math.min(window.devicePixelRatio, 3) );
 renderer.render( scene, camera );
 
+// Controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 // Clock
 const clock = new THREE.Clock();
 
@@ -118,6 +146,9 @@ const animationLoop = () => {
     // camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 2;
     // camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 2;
     // camera.lookAt(group.position);
+
+    // Update controls
+    controls.update();
 
     renderer.render( scene, camera );
 
