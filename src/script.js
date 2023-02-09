@@ -48,16 +48,53 @@ const scene = new THREE.Scene();
 //Object
 const group = new THREE.Group();
 scene.add( group );
-const geometry= new THREE.BoxGeometry(1,1,1);
+// const geometry = new THREE.Geometry();
+// for (let i = 0; i < 100; i++) {
+//     for (let j = 0; j < 3; j++) {
+//         geometry.vertices.push(new THREE.Vector3(
+//             (Math.random() - 0.5) * 4, 
+//             (Math.random() - 0.5) * 4, 
+//             (Math.random() - 0.5) * 4
+//             )
+//         );
+//     }
+//     geometry.faces.push(new THREE.Face3(
+//         i*3, 
+//         i*3+1, 
+//         i*3+2
+//     ));
+// }
+// const geometry= new THREE.BoxBufferGeometry(1,1,1,2,2,2);
+
+// const positionsArray = new Float32Array([
+//     0,0,0, //0
+//     0,1,0, //1
+//     1,0,0, //2
+// ]);
+
+
+
+const count = 4;
+const positionsArray = new Float32Array(count * 3 * 3);
+for (let i = 0; i < count * 3 * 3; i++) {
+    positionsArray[i] = (Math.random() - 0.5) * 4;
+}
+const geometry = new THREE.BufferGeometry();
+const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3);
+geometry.setAttribute('position', positionsAttribute);
+
 const edges = new THREE.EdgesGeometry(geometry);
 const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color: 0x000000}));
-const material = new THREE.MeshBasicMaterial({color: 0xffff00,  side: THREE.BackSide});
+const material = new THREE.MeshBasicMaterial({
+    color: 0xffff00,  
+    side: THREE.BackSide,
+});
 const mesh = new THREE.Mesh(geometry, material);
 scene.add( line );
 scene.add( mesh );
 group.add( line );
 group.add( mesh );
-group.rotation.reorder('YXZ');
+group.rotation.reorder('XYZ');
 group.position.set(0,0,0);
 group.rotation.set(0,0,0);
 group.scale.set(0.5,0.5,0.5);
@@ -102,10 +139,20 @@ window.addEventListener('resize', () => {
     renderer.setPixelRatio( Math.min(window.devicePixelRatio, 3) );
 });
 window.addEventListener('dblclick', () => {
-camera.position.set(0,0,4);
+    const target= camera.position;
+    if(Math.abs(target.z)>0.01 && Math.abs(target.y)>0.01 && Math.abs(target.x)>0.01){
+        gsap.to( 
+            camera.position,
+            { 
+                duration: 1.5,
+                delay: 0,
+                x: 0,
+                y: 0,
+                z: 4
+            }
+        )
+    }
 });
-
-console.log(canvasDimension);
 renderer.setSize( canvasDimension.width, canvasDimension.height );
 renderer.setPixelRatio( Math.min(window.devicePixelRatio, 3) );
 renderer.render( scene, camera );
@@ -117,14 +164,7 @@ controls.enableDamping = true;
 const clock = new THREE.Clock();
 
 // GSAP
-// gsap.to( 
-//     group.position,
-//     { 
-//         duration: 1,
-//         delay: 1,
-//         x: 2
-//     }
-// )
+
 // gsap.to( 
 //     group.position,
 //     { 
